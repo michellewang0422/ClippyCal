@@ -1,0 +1,72 @@
+Introduction
+
+This programming language simplifies calls to the Google Calendar API. As such, this programming language has direct access to the user's Google Calendar and modifies it. The language supports basic CRUD calls: creating, reading, updating, and deleting events on the calendar. 
+
+Examples:
+
+Input: "Schedule my lab meeting tomorrow at 3pm." Output: CalEvent(summary='Lab Meeting', start='2024-06-28T15:00:00', end=None).create()
+Input: "I have a dinner party next Thursday from 4 to 6pm." Output: CalEvent(summary='Dinner Party', start='2024-07-25T16:00:00', end='2024-07-25T18:00:00').create()
+Input: "Create an event called Congressional Hearing on Saturday in Paris starting at 5am and ending at 7pm." Output: CalEvent(summary='Congressional Hearing', start='2024-07-21T5:00:00', end='2024-07-21T19:00:00', description=None, time_zone='Europe/Paris')
+Input: "Change when my lunch starts to noon." Output: CalEvent.get(summary='Lunch with Sarah').update(new_summary=None, new_start='2024-07-16T12:00:00', new_end=None, shift_back=None, shift_forward=None, new_location=None, new_description='Updated')
+Input: "Get rid of my meeting with Dan." Output: CalEvent.get(summary='Meeting with Dan').delete()
+Input: "I can't go to my event tomorrow at 5pm." Output: CalEvent.get(summary=None, start='2024-09-15T17:00:00').delete()
+Input: "Do I have an appointment soon?" Output: CalEvent.find(summary='Appointment')
+Input: "What do I have planned at 3pm?" Output: CalEvent.find(summary=None, start='2024-07-13T15:00:00')
+Input: "What are my next five events?" Output: CalEvent.listEvents(number=5)
+Input: "What events do I have between 4pm and 6pm?" Output: CalEvent.listEvents(number=None, start='2024-07-16T16:00:00', end='2024-07-16T18:00:00')
+Input: "What events do I have today?" Ouput: CalEvent.listEvents(number=None, start='2024-08-01T14:00:00', end='2024-08-01T23:99:99')
+Input: “List my next three events and delete my lab meeting.” Output: CalEvent.listEvents(number=3)\nCalEvent.get(summary='lab meeting').delete()
+Input: “Add a doctor’s appointment to my calendar at 3pm on September 1st then update my date at 3pm on September 1st to 6pm.” Output: CalEvent(summary='Doctor’s appointment, start='2024-09-01T15:00:00').create()\nCalEvent.get(summary='date', start='2024-09-01T15:00:00').update(new_summary=None, new_start='2024-09-01T18:00:00')
+Input: "Create an event." Output: CalEvent(summnary=None, start=None).create()
+Input: "Remove." Output: CalEvent.get(summary=None, start=None).delete()
+Input: "Move my flight to one hour earlier." Output: CalEvent.get(summary='Flight').update(new_summary=None, new_start=None, new_end=None, shift_back='timedelta(hours=1)')
+Input: "Find my event called interview and push it back a week." Output: CalEvent.get(summary='Flight').update(new_summary=None, new_start=None, new_end=None, shift_back=None, shift_forward='timedelta(days=7)')
+
+Language Concepts
+
+The user needs to understand how to use a calendar. The user needs to understand the distinction between creating, finding, updating, or deleting events. The user also needs to separate each call by a new line "\n".
+
+Formal Syntax/Grammar
+
+<start>   ::= CalEvent.<command>
+            | CalEvent(<summary>, <start>, <end>, <location>, <description>, <time_zone>).<create>
+            | <start>\n<start>
+<command> ::= <get>.<update> | <get>.<delete> | <get>.<prettyprint> |
+            | <find>
+            | <listEvents>
+<create>  ::= create()
+<get>     ::= get(<summary>, <start>, <end>)
+<find>    ::= find(<summary>, <start>, <end>)
+            | find(<summary>)
+            | find(<start>)
+<update>  ::= update(<summary>, <start>, <end>, <back>, <forward>, <location>, <description>, <time_zone>)
+<delete>  ::= delete()
+<prettyprint>  ::= prettyprint()
+<listEvents>   ::= listEvents(<number>, <start>, <end>)
+
+<summary> ::= <string>
+<start>   ::= <string>
+<end>     ::= <string>
+<back>    ::= <string>
+<forward> ::= <string>
+<location>     ::= <string>
+<description>  ::= <string>
+<time_zone>    ::= <string>
+
+Semantics
+
+CalEvent = CalEvents are primitives. A CalEvent has six parameters, all of which are strings or None. The summary and end parameters are required. The other parameters are optional. Start and end should be in ISO 8601 format. Time zone should be in the form of a tzinfo identifier.
+
+CalEvent(<summary>, <start>, <end>, <location>, <description>, <time_zone>) = calls the CalEvent constructor to create a CalEvent object locally. The summary and end parameters are required. The other parameters are optional. Start and end should be in ISO 8601 format. Time zone should be in the form of a tzinfo identifier.
+
+CalEvent(<summary>, <start>, <end>, <location>, <description>, <time_zone>).create() = creates a local CalEvent and adds it as a calendar event to the Google Calendar. The summary and end parameters are required. The other parameters are optional. Start and end should be in ISO 8601 format. Time zone should be in the form of a tzinfo identifier.
+
+CalEvent.find(<summary>, <start>, <end>) = finds an event in the Google calendar. Can be called on its own. Either the summary or start parameter is necessary. The other parameters are optional. Start and end should be in ISO 8601 format. Searches the Google calendar for an event by summary and or start time and end time. If no time range is given finds event by summary. If no summary is given finds event at given time.
+
+CalEvent.get(<summary>, <start>, <end>) = gets an event in the Google calendar. Must be called with either update, delete, or prettyprint. Either the summary or start parameter is necessary. The other parameters are optional. Start and end should be in ISO 8601 format. Searches the Google calendar for an event by summary and or start time and end time. If no time range is given finds event by summary. If no summary is given finds event at given time.
+
+CalEvent.get(<summary>, <start>, <end>).update(<summary>, <start>, <end>, <back>, <forward>, <location>, <description>, <time_zone>) = gets an event in the Google Calendar and updates it. Update has eight parameters, all of which are strings or None. All of the parameters are optional. Start and end should be in ISO 8601 format. Back and forward should be in the form of timedelta objects. Time zone should be in the form of a tzinfo identifier.
+
+CalEvent.get(<summary>, <start>, <end>).delete() = gets an event in the Google calendar and deletes it. Delete has no parameters.
+
+CalEvent.listEvents(<number>, <start>, <end>) = lists events from the Google calendar. List events has three parameters, all of which are strings or none. Either the number or start parameter is necessary. The other parameters are optional. Lists the first number of events in the given time range. If no time range is given lists next number of events from current time. If no number is given lists all events in time range. If no end time is given defaults to a year after the start time.
